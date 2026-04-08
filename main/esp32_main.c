@@ -11,19 +11,17 @@
 #include "esp_err.h"
 #include "middleglyph.h"
 
-
 #define I2C_PORT        0
 #define I2C_SDA_IO      21
 #define I2C_SCL_IO      22
 #define OLED_ADDR       0x3C
 
 
-
 static i2c_master_dev_handle_t dev_handle;
 static SemaphoreHandle_t i2c_mutex;
 
-static void ssd1306_cmd(uint8_t cmd) {
-    uint8_t d[2] = {0x00, cmd};
+static void ssd1306_cmd(const uint8_t cmd) {
+    const uint8_t d[2] = {0x00, cmd};
     i2c_master_transmit(dev_handle, d, 2, -1);
 }
 
@@ -50,9 +48,10 @@ void display_task(void *pv) {
     int p_scroll = 0;
     while (1) {
 
-        draw_scrolling_row_12("created by thiagorigonatti from", 12, p_scroll);
+        draw_scrolling_row("abcdefghijklmnopqrstuvwxyzàáâãéêíóôõúç", 0, p_scroll, 24);
+        draw_static_row("by Thiago", 36, 12);
+        draw_static_row("Rigonatti", 48, 12);
 
-        draw_static_row_24("tc", 36);
 
         ssd1306_update();
 
@@ -62,7 +61,6 @@ void display_task(void *pv) {
 }
 
 void app_main(void) {
-
     i2c_mutex = xSemaphoreCreateMutex();
 
     const i2c_master_bus_config_t b_cfg = {
